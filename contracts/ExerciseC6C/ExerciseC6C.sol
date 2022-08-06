@@ -26,6 +26,8 @@ contract ExerciseC6C {
     address private contractOwner;              // Account used to deploy contract
     mapping(string => Profile) employees;      // Mapping for storing employees
 
+    mapping(address => uint256) private authorizedContract;
+
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -60,6 +62,11 @@ contract ExerciseC6C {
         _;
     }
 
+    modifier isCallerAuthorized() {
+        require(authorizedContract[msg.sender] == 1, "Caller is not authorized");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -79,6 +86,8 @@ contract ExerciseC6C {
     {
         return employees[id].isRegistered;
     }
+
+
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
@@ -124,8 +133,7 @@ contract ExerciseC6C {
                                     uint256 bonus
 
                                 )
-                                internal
-                                requireContractOwner
+                                external
     {
         require(employees[id].isRegistered, "Employee is not registered.");
 
@@ -134,40 +142,47 @@ contract ExerciseC6C {
 
     }
 
-    function calculateBonus
-                            (
-                                uint256 sales
-                            )
-                            internal
-                            view
-                            requireContractOwner
-                            returns(uint256)
-    {
-        if (sales < 100) {
-            return sales.mul(5).div(100);
-        }
-        else if (sales < 500) {
-            return sales.mul(7).div(100);
-        }
-        else {
-            return sales.mul(10).div(100);
-        }
+    function authorizeContract(address dataContract) external requireContractOwner {
+        authorizedContract[dataContract] = 1;
     }
 
-    function addSale
-                                (
-                                    string id,
-                                    uint256 amount
-                                )
-                                external
-                                requireContractOwner
-    {
-        updateEmployee(
-                        id,
-                        amount,
-                        calculateBonus(amount)
-        );
+    function deAuthorizeContract(address dataContract) external requireContractOwner {
+        delete authorizedContract[dataContract];
     }
+    // function calculateBonus
+    //                         (
+    //                             uint256 sales
+    //                         )
+    //                         internal
+    //                         view
+    //                         requireContractOwner
+    //                         returns(uint256)
+    // {
+    //     if (sales < 100) {
+    //         return sales.mul(5).div(100);
+    //     }
+    //     else if (sales < 500) {
+    //         return sales.mul(7).div(100);
+    //     }
+    //     else {
+    //         return sales.mul(10).div(100);
+    //     }
+    // }
+
+    // function addSale
+    //                             (
+    //                                 string id,
+    //                                 uint256 amount
+    //                             )
+    //                             external
+    //                             requireContractOwner
+    // {
+    //     updateEmployee(
+    //                     id,
+    //                     amount,
+    //                     calculateBonus(amount)
+    //     );
+    // }
 
 
 }
